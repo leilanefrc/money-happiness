@@ -32,10 +32,20 @@ df = merge(df, regions, by="Country")
 
 ```{r describe, echo=FALSE, include=FALSE}
 
-df %>%
+general_stats = df %>%
   summarise(across(c(Happiness_score,HDI,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd)))
 
 ```
+
+```{r correlations, echo=FALSE, results='asis'}
+
+data_correlations = cor(data.frame(df["Happiness_score"], df["HDI"], df["GDP_per_capita"]))
+rownames(data_correlations) = c("Happiness score", "HDI", "GDP per capita")
+colnames(data_correlations) = c("Happiness score", "HDI", "GDP per capita")
+kable(data_correlations, caption = "correlations")
+
+```
+
 
 ```{r describe_by, echo=FALSE}
 
