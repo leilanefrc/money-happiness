@@ -12,36 +12,59 @@ library(knitr)
 
 ## Introduction
 
+This is an old question and you already probably thought about it at some point in your life, finding your own answer for it. In the past decade, there has been an increasing effort to make happiness a variable to be taken into account in government policymaking. The World Happiness Report, which polls people around the world about their lives, resulting in the Happiness Score, is a reflection of this. In this report, I will explore the relationship between the Happiness Score and GDP per capita* to try to answer the question. 
+
+*The GDP per capita is the Gross Domestic Product (GDP) per person in an economy. The GDP, in simple terms, is the monetary value of how much a country produced within its borders in a certain period. It is the main variable used to evaluate the state of an economy.
+
 ```{r data, include=FALSE}
 library(readxl)
 library(dplyr)
 library(ggplot2)
 
 happiness <- read_excel("C:/Users/leica/Desktop/happiness.xlsx")
-HDI <- read_excel("C:/Users/leica/Desktop/happiness.xlsx", sheet = "HDI")
 GDP <- read_excel("C:/Users/leica/Desktop/happiness.xlsx", sheet = "GDP")
 regions <- read_excel("C:/Users/leica/Desktop/happiness.xlsx", sheet = "Regions")
 
-df = merge(happiness, HDI, by="Country")
-df = merge(df, GDP, by="Country")
+df = merge(happiness, GDP, by="Country")
 df = merge(df, regions, by="Country")
 
 ```
 
 ## Descriptive statistics
 
-```{r describe, echo=FALSE, include=FALSE}
+...
 
-general_stats = df %>%
-  summarise(across(c(Happiness_score,HDI,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd)))
+Correlation between them is ~0.7450.
+
+```{r describe, echo=FALSE, results='asis'}
+column_names <- c("Mean", "Min.", "Max.", "St. dev.")
+row_names <- c("Happiness Score", "GDP per capita")
+
+general_stats <- df %>%
+  summarise(across(c(Happiness_score,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd))) %>%
+  mutate_if(is.numeric, round, digits = 2)
+
+general_stats <- as.data.frame(general_stats)
+
+happiness_stats <- general_stats[1:4]
+GDP_stats <- general_stats[5:8]
+
+colnames(happiness_stats) <- column_names
+colnames(GDP_stats) <- column_names
+
+stats_table <- rbind(happiness_stats, GDP_stats)
+
+rownames(stats_table) <- row_names
+
+kable(stats_table, caption = "Descriptive statistics")
 
 ```
 
-```{r correlations, echo=FALSE, results='asis'}
+```{r correlations, eval=FALSE, include=FALSE, results='asis'}
 
-data_correlations = cor(data.frame(df["Happiness_score"], df["HDI"], df["GDP_per_capita"]))
-rownames(data_correlations) = c("Happiness score", "HDI", "GDP per capita")
-colnames(data_correlations) = c("Happiness score", "HDI", "GDP per capita")
+data_correlations = cor(data.frame(df["Happiness_score"], df["GDP_per_capita"]))
+rownames(data_correlations) = c("Happiness score", "GDP per capita")
+colnames(data_correlations) = c("Happiness score", "GDP per capita")
 kable(data_correlations, caption = "correlations")
 
 ```
@@ -49,9 +72,22 @@ kable(data_correlations, caption = "correlations")
 
 ```{r describe_by, echo=FALSE}
 
-df %>%
+stats_by_region <- df %>%
   group_by(World_Region) %>%
-  summarise(across(c(Happiness_score,HDI,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd)))
+  summarise(across(c(Happiness_score,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd))) %>%
+  mutate_if(is.numeric, round, digits = 2)
+
+column_names <- c("World region", "Mean", "Min.", "Max.", "St. dev.")
+row_names <- c("East Asia and Pacific", "Europe and Central Asia", "Latin America and Caribbean", "Middle East and North Africa", "North America", "South Asia", "Sub-Saharan Africa")
+
+happiness_stats <- stats_by_region[,1:5]
+colnames(happiness_stats) <- column_names
+kable(happiness_stats, caption = "Descriptive statistics of the Happiness Score by world region")
+
+GDP_stats <- as.data.frame(stats_by_region[,6:9])
+GDP_stats <- cbind(row_names,GDP_stats)
+colnames(GDP_stats) <- column_names
+kable(GDP_stats, caption = "Descriptive statistics of the GDP per capita by world region")
 
 ```
 
@@ -68,6 +104,12 @@ scatterPlot
 ```
 
 ## Fitting a model
+
+This nonlinear relationship between the Happiness Score and GDP per capita suggests a logarithmic model could be a good candidate to fit the data. Hence, in what follows, I fit the data to: 
+
+$Happiness\_Score = \beta_0 + \beta_1\log(GDP\_per\_capita) + \epsilon$,
+
+where $\beta_0$ is the intercept, $\beta_1$ is the coefficient for the effect of log of GDP per capita on the Happiness Score, and $\epsilon$ is an error term.
 
 ```{r model, echo=FALSE}
 
