@@ -12,9 +12,13 @@ library(knitr)
 
 ## Introduction
 
-This is an old question and you already probably thought about it at some point in your life, finding your own answer for it. In the past decade, there has been an increasing effort to make happiness a variable to be taken into account in government policymaking. The World Happiness Report, which polls people around the world about their lives, resulting in the Happiness Score, is a reflection of this. In this report, I will explore the relationship between the Happiness Score and GDP per capita* to try to answer the question. 
+This is an old question and you already probably thought about it at some point in your life, finding your own answer for it. In the past decade, there has been an increasing effort to make happiness a variable to be taken into account in government policymaking. The World Happiness Report, which polls people around the world about their lives, resulting in the Happiness Score, is a reflection of this.
 
-*The GDP per capita is the Gross Domestic Product (GDP) per person in an economy. The GDP, in simple terms, is the monetary value of how much a country produced within its borders in a certain period. It is the main variable used to evaluate the state of an economy.
+In a [dashboard in Tableau Public](https://public.tableau.com/app/profile/leilane.cambara/viz/Doesmoneybuyhappiness_17107642856590/MoneyandHappiness), I created a visualisation to explore the relationship between the Happiness Score and GDP per capita to try to answer the question. 
+
+_The GDP per capita is the Gross Domestic Product (GDP) per person in an economy and the GDP, in simple terms, is the monetary value of how much a country produced within its borders in a certain period. It is the main variable used to evaluate the state of an economy._
+
+In this report, I analyse the data and fit a model to it.
 
 ```{r data, include=FALSE}
 library(readxl)
@@ -32,18 +36,44 @@ df = merge(df, regions, by="Country")
 
 ## Descriptive statistics
 
-...
+The Happiness Score comes from the [World Happiness Report](https://worldhappiness.report/) and the GDP per capita comes from [Our World in Data and the World Bank](https://ourworldindata.org/grapher/gdp-per-capita-worldbank). In order to be able to also explore potential regional differences, I group the countries by world regions as categorised by the World Bank, collected from [Our World in Data](https://ourworldindata.org/grapher/world-regions-according-to-the-world-bank).
 
-Correlation between them is ~0.7450.
-
-```{r describe, echo=FALSE, results='asis'}
+```{r include=FALSE}
 column_names <- c("Mean", "Min.", "Max.", "St. dev.")
 row_names <- c("Happiness Score", "GDP per capita")
+
+n_distinct(df$Country)
+
+```
+
+
+I merge the data sets using an inner join, such that I keep only the countries with records in all tables. This results in a sample of 138 countries, with the following distribution by regions:
+
+```{r echo=FALSE}
+
+count_by_region <- df %>%
+  group_by(World_Region) %>%
+  summarise(count = n_distinct(Country))
+
+colnames(count_by_region) <- c("World Region", "Countries")
+
+kable(count_by_region, caption = "Number of countries per region")
+
+```
+
+Europe and Central Asia is the region with the most number of countries, 48, followed by the Sub-Saharan Africa. North America is the region with the least number of countries, with only two: United States and Canada. Even though Mexico is geographically located in North America, it is considered a Latin American country, such that it is included in Latin America and Caribbean.
+
+The Happiness Score, by construction, is a number that ranges from zero to ten. The GDP per capita is expressed in international dollars at 2017 prices, and can be any positive number.
+
+In 2021(2022?), the average of the Happiness Score around the world was 5.56, just above 50%, with a minimum of 2.4, maximum of 7.82 and standard deviation of 1.11. The happiest country in the world was Finland and the least happy, Afghanistan.
+
+The average GDP per capita was 2263.43 international dollars, with a minimum of 1186.58, maximum of 115683.49, and standard deviation of 22013.07. Highest GDP: Luxembourg. Lowest GDP: Niger. Luxembourg was almost 100 times more than Niger.
+
+```{r describe, echo=FALSE, results='asis'}
 
 general_stats <- df %>%
   summarise(across(c(Happiness_score,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd))) %>%
   mutate_if(is.numeric, round, digits = 2)
-
 general_stats <- as.data.frame(general_stats)
 
 happiness_stats <- general_stats[1:4]
@@ -56,7 +86,7 @@ stats_table <- rbind(happiness_stats, GDP_stats)
 
 rownames(stats_table) <- row_names
 
-kable(stats_table, caption = "Descriptive statistics")
+kable(stats_table, caption = "Descriptive statistics of the Happiness Score and GDP per capita")
 
 ```
 
@@ -69,6 +99,8 @@ kable(data_correlations, caption = "correlations")
 
 ```
 
+North America was the happiest region, 7: Canada with 7.03 and the United States with 6.98. South Asia the least happy, 4.27 (min of 2.4, Afghanistan, and max of 5.38, Nepal). Middle East and North Africa had the widest range, min of 2.96 (Lebanon) and max of 7.36 (Israel), average of 5.29. Latin America and Caribbean, smallest range and standard deviation (if you do not count North America, which only has two countries): average of 6.01, min of 5.53 (Ecuador), max of 6.58 (Costa Rica), standard deviation of 0.32.
+
 
 ```{r describe_by, echo=FALSE}
 
@@ -77,7 +109,7 @@ stats_by_region <- df %>%
   summarise(across(c(Happiness_score,GDP_per_capita), list(mean = mean, min = min, max = max, sd = sd))) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-column_names <- c("World region", "Mean", "Min.", "Max.", "St. dev.")
+column_names <- c("World Region", "Mean", "Min.", "Max.", "St. dev.")
 row_names <- c("East Asia and Pacific", "Europe and Central Asia", "Latin America and Caribbean", "Middle East and North Africa", "North America", "South Asia", "Sub-Saharan Africa")
 
 happiness_stats <- stats_by_region[,1:5]
@@ -92,6 +124,8 @@ kable(GDP_stats, caption = "Descriptive statistics of the GDP per capita by worl
 ```
 
 ## The relationship between money (GDP per capita) and happiness
+
+Moderate positive correlation between them: ~0.7450. But the scatter plot suggests a nonlinear relationship between them.
 
 ```{r scatterplot, echo=FALSE}
 
