@@ -18,7 +18,7 @@ In a [dashboard in Tableau Public](https://public.tableau.com/app/profile/leilan
 
 _The GDP per capita is the Gross Domestic Product (GDP) per person in an economy and the GDP, in simple terms, is the monetary value of how much a country produced within its borders in a certain period. It is the main variable used to evaluate the state of an economy._
 
-In this report, I analyse the data and fit a model to it.
+In this shirt report, I analyse the data and fit a model to it.
 
 ```{r data, include=FALSE}
 library(readxl)
@@ -61,13 +61,13 @@ kable(count_by_region, caption = "Number of countries per region")
 
 ```
 
-Europe and Central Asia is the region with the most number of countries, 48, followed by the Sub-Saharan Africa. North America is the region with the least number of countries, with only two: United States and Canada. Even though Mexico is geographically located in North America, it is considered a Latin American country, such that it is included in Latin America and Caribbean.
+Europe and Central Asia is the region with the most number of countries (48), followed by the Sub-Saharan Africa (34). North America is the region with the least number of countries, with only two: United States and Canada. Even though Mexico is geographically located in North America, it is culturally a Latin American country, such that it is included in Latin America and Caribbean region.
 
-The Happiness Score, by construction, is a number that ranges from zero to ten. The GDP per capita is expressed in international dollars at 2017 prices, and can be any positive number.
+The Happiness Score, by construction, is a number that ranges from zero to ten, while the GDP per capita is expressed in international dollars at 2017 prices and can be any positive number.
 
-In 2021(2022?), the average of the Happiness Score around the world was 5.56, just above 50%, with a minimum of 2.4, maximum of 7.82 and standard deviation of 1.11. The happiest country in the world was Finland and the least happy, Afghanistan.
+In 2022, the average of the Happiness Score around the world was 5.56, just above 50%, with a standard deviation of 1.11. The countries who had the minimum and maximum Happiness Score, or in other words the happiest country and the least happy country in the world were Finland (score of 7.82) and Afghanistan (score of 2.4).
 
-The average GDP per capita was 2263.43 international dollars, with a minimum of 1186.58, maximum of 115683.49, and standard deviation of 22013.07. Highest GDP: Luxembourg. Lowest GDP: Niger. Luxembourg was almost 100 times more than Niger.
+The average GDP per capita in 2022 was 2263.43 international dollars, with a standard deviation of 22013.07. The highest GDP per capita (115683.49, achieved by Luxembourg) was almost 100 times higher than the lowest one (1186.58, produced by Niger).
 
 ```{r describe, echo=FALSE, results='asis'}
 
@@ -99,8 +99,7 @@ kable(data_correlations, caption = "correlations")
 
 ```
 
-North America was the happiest region, 7: Canada with 7.03 and the United States with 6.98. South Asia the least happy, 4.27 (min of 2.4, Afghanistan, and max of 5.38, Nepal). Middle East and North Africa had the widest range, min of 2.96 (Lebanon) and max of 7.36 (Israel), average of 5.29. Latin America and Caribbean, smallest range and standard deviation (if you do not count North America, which only has two countries): average of 6.01, min of 5.53 (Ecuador), max of 6.58 (Costa Rica), standard deviation of 0.32.
-
+Analysing the Happiness Score by region, we see that North America was the happiest region in 2022, with a score of 7: 7.03 for Canada and 6.98 for the United States. As it was classified, North America is an homogeneous region, which reflects in similar Happiness Scores. South Asia, on the other hand, which includes the least happy country in the world (Afghanistan) was the least happy region, with an average score of 4.27. The happiest country in the region, Nepal, only scored 5.38. Middle East and North Africa is the region with the highest standard deviation and widest Happiness Score range: Lebanon scored the minimum of 2.96 and Israel the maximum of 7.36. The region's average score was 5.29. After North America, which only includes two countries, Latin America and Caribbean, which had an average score of 6.01, is the region with the smallest standard deviation (0.32) and range in the score: Costa Rica was the happiest country with 6.58 and Ecuador was the least happy with 5.53.
 
 ```{r describe_by, echo=FALSE}
 
